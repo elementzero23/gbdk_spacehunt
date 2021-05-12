@@ -71,9 +71,9 @@ Area                       Addr        Size        Decimal Bytes (Attributes)
      00000007  l__GSINIT |    00000007  l__HEADER |    00000008  l__HEADER
      00000012  l__DATA   |    0000002C  l__HEADER |    00000033  l__HEADER
      00000054  l__BSS    |    0000006A  l__HOME   |    00000083  l__HEADER
-     00000191  l__BASE   |    00000200  s__CODE   |    00001882  l__CODE  
-     00001A82  s__HOME   |    00001AEC  s__BASE   |    00001C7D  s__CODE_0
-     00001C7D  s__GSINIT |    00001C7D  s__LIT    |    00001C84  s__GSFINA
+     00000191  l__BASE   |    00000200  s__CODE   |    00001B79  l__CODE  
+     00001D79  s__HOME   |    00001DE3  s__BASE   |    00001F74  s__CODE_0
+     00001F74  s__GSINIT |    00001F74  s__LIT    |    00001F7B  s__GSFINA
      0000C000  _shadow_O |    0000C0A0  s__DATA   |    0000C0B2  s__BSS   
      0000C106  s__HEAP   |    0000E000  .STACK    |    0000FF80  .refresh_
 ASxxxx Linker V03.00 + NoICE + sdld,  page 3.
@@ -81,15 +81,16 @@ Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_CODE                  00000200    00001882 =        6274. bytes (REL,CON)
+_CODE                  00000200    00001B79 =        7033. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
      00000200  _play_sho |    00000215  _space_hu |    00000F15  _space_hu
      0000107D  _SpaceHun |    0000134D  _SpaceHun |    000013BD  _SpaceHun
      0000157D  _shoot    |    00001603  _move_sho |    00001668  _scroll_b
-     00001681  _main     |    00001A00  _rand     |    00001A00  _randw   
-     00001A2B  _arand    |    00001A57  _initaran
+     00001681  _hideOppo |    0000169D  _hideRock |    000016BE  _endShot 
+     00001709  _detect_c |    00001985  _main     |    00001CF7  _rand    
+     00001CF7  _randw    |    00001D22  _arand    |    00001D4E  _initaran
 ASxxxx Linker V03.00 + NoICE + sdld,  page 4.
 Hexadecimal  [32-Bits]
 
@@ -255,46 +256,46 @@ Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_HOME                  00001A82    0000006A =         106. bytes (REL,CON)
+_HOME                  00001D79    0000006A =         106. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
-     00001A82  .remove_V |    00001A85  .remove_i |    00001AA2  .add_VBL 
-     00001AA5  .add_int  |    00001AB0  .wait_vbl |    00001AB0  _wait_vbl
-     00001ABF  .display_ |    00001ABF  _display_ |    00001AD6  _remove_V
-     00001AE1  _add_VBL 
+     00001D79  .remove_V |    00001D7C  .remove_i |    00001D99  .add_VBL 
+     00001D9C  .add_int  |    00001DA7  .wait_vbl |    00001DA7  _wait_vbl
+     00001DB6  .display_ |    00001DB6  _display_ |    00001DCD  _remove_V
+     00001DD8  _add_VBL 
 ASxxxx Linker V03.00 + NoICE + sdld,  page 22.
 Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_BASE                  00001AEC    00000191 =         401. bytes (REL,CON)
+_BASE                  00001DE3    00000191 =         401. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
-     00001AEC  _initrand |    00001AEE  .initrand |    00001AF7  .padup   
-     00001AF7  _waitpadu |    00001B07  .jpad     |    00001B07  _joypad  
-     00001B2F  _waitpad  |    00001B32  .wait_pad |    00001B39  _set_bkg_
-     00001B39  _set_win_ |    00001B41  _set_spri |    00001B71  _set_bkg_
-     00001BB5  .set_xy_w |    00001BBE  .set_xy_b |    00001BCD  .set_xy_s
-     00001C13  _set_bkg_ |    00001C27  .set_xy_w |    00001C30  .set_xy_b
-     00001C3F  .set_xy_t
+     00001DE3  _initrand |    00001DE5  .initrand |    00001DEE  .padup   
+     00001DEE  _waitpadu |    00001DFE  .jpad     |    00001DFE  _joypad  
+     00001E26  _waitpad  |    00001E29  .wait_pad |    00001E30  _set_bkg_
+     00001E30  _set_win_ |    00001E38  _set_spri |    00001E68  _set_bkg_
+     00001EAC  .set_xy_w |    00001EB5  .set_xy_b |    00001EC4  .set_xy_s
+     00001F0A  _set_bkg_ |    00001F1E  .set_xy_w |    00001F27  .set_xy_b
+     00001F36  .set_xy_t
 ASxxxx Linker V03.00 + NoICE + sdld,  page 23.
 Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_GSINIT                00001C7D    00000007 =           7. bytes (REL,CON)
+_GSINIT                00001F74    00000007 =           7. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
-     00001C7D  gsinit   
+     00001F74  gsinit   
 ASxxxx Linker V03.00 + NoICE + sdld,  page 24.
 Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_GSFINAL               00001C84    00000001 =           1. bytes (REL,CON)
+_GSFINAL               00001F7B    00000001 =           1. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
@@ -890,7 +891,7 @@ _SFR36                 00000000    00000001 =           1. bytes (ABS,CON)
 Files Linked                              [ module(s) ]
 
 ../../lib/small/asxxxx/gb/crt0.o          [ Runtime ]
-/var/folders/py/yjy902pj08x6y7dzs3nw6_ym0000gn/T/lcc126760.o
+/var/folders/py/yjy902pj08x6y7dzs3nw6_ym0000gn/T/lcc134790.o
                                           [ spacehunt ]
 
 

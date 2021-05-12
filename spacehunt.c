@@ -85,6 +85,71 @@ void scroll_background() {
             step = 0;
 }
 
+void hideOpponent() {
+    opY = 0;
+    do {
+        opY = 0;
+        opX = arand();
+    } while (opX < 12 || opX > 128);
+}
+
+void hideRock() {
+    rockY = 0;
+    rockStep = 0;
+    do {
+        rockY = 0;
+        rockX = arand();
+    } while (rockX < 12 || rockX > 128);
+}
+
+void endShot(UINT8 shotNumber) {
+    if (shotNumber == 1) {
+        shot1IsMoving = false;
+        shot1X = 0;
+        shot1Y = 0;
+        move_sprite(12, 0, 0);
+        move_sprite(13, 0, 0);
+    }
+    if (shotNumber == 2) {
+        shot2IsMoving = false;
+        shot2X = 0;
+        shot2Y = 0;
+        move_sprite(12, 0, 0);
+        move_sprite(13, 0, 0);
+    }
+}
+
+void detect_collission() {
+    if (shot1X >= opX - 12
+        && shot1X <= opX + 10
+        && shot1Y <= opY + 8
+        && shot1Y >= opY) {
+            endShot(1);
+            hideOpponent();
+    }
+    if (shot2X >= opX - 12
+        && shot2X <= opX + 10
+        && shot2Y <= opY + 8
+        && shot2Y >= opY) {
+            endShot(2);
+            hideOpponent();
+    }
+    if (shot1X >= rockX - 12
+        && shot1X <= rockX + 10
+        && shot1Y <= rockY + 8
+        && shot1Y >= rockY) {
+            endShot(1);
+            hideRock();
+    }
+    if (shot2X >= rockX - 12
+        && shot2X <= rockX + 10
+        && shot2Y <= rockY + 8
+        && shot2Y >= rockY) {
+            endShot(2);
+            hideRock();
+    }
+}
+
 void main() {
     DISPLAY_OFF;
 
@@ -108,7 +173,7 @@ void main() {
     NR51_REG = 0xff;
 
     // change sprite pallette (white not showing yet)
-    OBP0_REG = 0x93;
+    OBP0_REG = 0x27;
 
     // player ship
     set_sprite_data(0, 31, SpaceHuntSpriteTiles);
@@ -170,6 +235,8 @@ void main() {
     shot1IsMoving = false;
     shot2IsMoving = false;
 
+    shot2Y = 0;
+
     while(1) {
         scroll_background();
 
@@ -181,13 +248,18 @@ void main() {
             if (shipX < 148)
                 shipX++;
         }
+        UINT8 halfwayUp = 72 - (144-shipY);
         if (joy & J_A) {
-            if (!shot1IsMoving) {
+            if (!shot1IsMoving && shot2Y <= halfwayUp) {
                 shoot(1);
             }
-            if (!shot2IsMoving && shot1Y <= 72 - (144-shipY)) {
+            if (!shot2IsMoving && shot1Y <= halfwayUp) {
                 shoot(2);
             }
+        }
+
+        if (joy & J_B) {
+            hideOpponent();
         }
 
         // move ship left or right
@@ -206,6 +278,7 @@ void main() {
                 opY = 0;
                 opX = arand();
             } while (opX < 12 || opX > 128);
+            opX = 80;
         }
         move_sprite(4, opX, opY);
         move_sprite(5, opX, opY+8);
@@ -234,6 +307,8 @@ void main() {
                 rockIsMoving = false;
             }
         }
+
+        detect_collission();
 
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
