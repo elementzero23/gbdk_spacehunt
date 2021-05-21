@@ -23,15 +23,16 @@ BOOLEAN game_over;
 UINT8 score;
 
 UINT8 shipX, shipY;
-UINT8 shot1X, shot1Y, shot2X, shot2Y;
+UINT8 shot1X, shot1Y, shot2X, shot2Y; // sprite numbers 12, 13, 14, 15
 UINT8 shotCooldown;
 
 UINT8 opX, opY;
+UINT8 shot3X, shot3Y; // sprite numbers 16, 17
 UINT8 rockX, rockY;
 
 UBYTE rockStep;
 BOOLEAN rockIsMoving;
-BOOLEAN shot1IsMoving, shot2IsMoving;
+BOOLEAN shot1IsMoving, shot2IsMoving, shot3IsMoving;
 
 void performantDelay(UINT8 n) {
     UINT8 i;
@@ -54,20 +55,32 @@ void shoot(UINT8 shotNumber) {
     if (shotNumber == 1) {
         shot1X = shipX;
         shot1Y = shipY-4;
-        set_sprite_tile(12, 26);
+        set_sprite_tile(12, 24);
         move_sprite(12, shot1X, shot1Y);
-        set_sprite_tile(13, 26);
+        set_sprite_tile(13, 24);
         move_sprite(13, shot1X+8, shot1Y);
         shot1IsMoving = true;
     }
     if (shotNumber == 2) {
         shot2X = shipX;
         shot2Y = shipY-4;
-        set_sprite_tile(14, 26);
+        set_sprite_tile(14, 24);
         move_sprite(14, shot2X, shot2Y);
-        set_sprite_tile(15, 26);
+        set_sprite_tile(15, 24);
         move_sprite(15, shot2X+8, shot2Y);
         shot2IsMoving = true;
+    }
+}
+
+void op_shoot(UINT8 shotNumber) {
+    if (shotNumber == 3) {
+        shot3X = opX-2;
+        shot3Y = opY+14;
+        set_sprite_tile(16, 25);
+        move_sprite(16, shot3X, shot3Y);
+        set_sprite_tile(17, 25);
+        move_sprite(17, shot3X+12, shot3Y);
+        shot3IsMoving = true;
     }
 }
 
@@ -88,6 +101,14 @@ void move_shots() {
             shot2IsMoving = false;
         }
     }
+    if (shot3IsMoving) {
+        shot3Y += 2;
+        move_sprite(16, shot3X, shot3Y);
+        move_sprite(17, shot3X+12, shot3Y);
+        if (shot3Y == 160) {
+            shot3IsMoving = false;
+        }
+    }
 }
 
 void scroll_background() {
@@ -105,7 +126,7 @@ void hideOpponent() {
     do {
         opY = 0;
         opX = arand();
-    } while (opX < 12 || opX > 128);
+    } while (opX < 12 || opX > 128 || opX > rockX - 32 && opX < rockX + 32);
 }
 
 void hideRock() {
@@ -114,7 +135,7 @@ void hideRock() {
     do {
         rockY = 0;
         rockX = arand();
-    } while (rockX < 12 || rockX > 128);
+    } while (rockX < 12 || rockX > 128|| rockX > opX - 32 && rockX < opX + 32);
 }
 
 void endShot(UINT8 shotNumber) {
@@ -129,8 +150,15 @@ void endShot(UINT8 shotNumber) {
         shot2IsMoving = false;
         shot2X = 0;
         shot2Y = 0;
-        move_sprite(12, 0, 0);
-        move_sprite(13, 0, 0);
+        move_sprite(14, 0, 0);
+        move_sprite(15, 0, 0);
+    }
+    if (shotNumber == 3) {
+        shot3IsMoving = false;
+        shot3X = 0;
+        shot3Y = 0;
+        move_sprite(16, 0, 0);
+        move_sprite(17, 0, 0);
     }
 }
 
@@ -177,11 +205,21 @@ void detectCollission() {
         || shipX >= opX - 12
         && shipX <= opX + 10
         && shipY <= opY + 8
-        && shipY >= opY) {
+        && shipY >= opY
+        || shot3X >= shipX - 12
+        && shot3X <= shipX +10
+        && shot3Y >= shipY
+        && shot3Y <= shipY + 8) {
+            UINT16 new_map_offset = 260;
+            UINT8 i;
+            for (i = 11; i < 20; i++) {
+                SpaceHuntWindowMap[new_map_offset + (i - 11)] = SpaceHuntWindowMap[i];
+                SpaceHuntWindowMap[i] = 0x00;
+            }
+            set_win_tiles(0, 0, 20, 1, SpaceHuntWindowMap);
+            move_win(7, 0);
+            SHOW_WIN;
             HIDE_SPRITES;
-            puts(" ");
-            puts("game over");
-            printf("score: %d", score);
             game_over = true;
         }
 }
@@ -205,7 +243,8 @@ void updateScore() {
  *  Before line 7 gets drawn, we hide it.
  */
 void interruptLCD() {
-    switch (LYC_REG)
+    if (!game_over) {
+        switch (LYC_REG)
     {
     case 0x00:
         SHOW_WIN;
@@ -221,6 +260,7 @@ void interruptLCD() {
     
     default:
         break;
+    }
     }
 }
 
@@ -246,7 +286,7 @@ void main() {
     NR50_REG = 0x77;
     NR51_REG = 0xff;
 
-    // change sprite pallette (white not showing yet)
+    // change sprite pallette
     OBP0_REG = 0x27;
 
     // player ship
@@ -271,16 +311,13 @@ void main() {
     set_sprite_prop(6, S_FLIPY);
     set_sprite_tile(7, 11);
     set_sprite_prop(7, S_FLIPY);
-    do {
-        opX = rand();
-    } while (opX < 8 || opX > 160);
-    //opX = 100;
-    opY = 0;
+    hideOpponent();
+    /*
     move_sprite(4, opX, opY);
     move_sprite(5, opX, opY+8);
     move_sprite(6, opX+8, opY);
     move_sprite(7, opX+8, opY+8);
-
+    */
 
     // rock
     set_sprite_tile(8, 16);
@@ -321,8 +358,9 @@ void main() {
 
     shot1IsMoving = false;
     shot2IsMoving = false;
+    shot3IsMoving = false;
 
-    shotCooldown = 60;
+    shotCooldown = 0;
     shot2Y = 0;
 
     score = 0;
@@ -332,20 +370,20 @@ void main() {
         joy = joypad();
         if (joy & J_LEFT) {
             if (shipX > 12)
-                shipX--;
+                shipX -= 2;
         } else if (joy & J_RIGHT) {
             if (shipX < 148)
-                shipX++;
+                shipX += 2;
         }
         UINT8 halfwayUp = 72 - (144-shipY);
         shotCooldown++;
         if (joy & J_A) {
             //if (!shot1IsMoving && shot2Y <= halfwayUp) {
-            if (!shot1IsMoving && shotCooldown >= 60) {
+            if (!shot1IsMoving && shotCooldown >= 30) {
                 shoot(1);
             }
             //if (!shot2IsMoving && shot1Y <= halfwayUp) {
-            if (shot1IsMoving && shotCooldown >= 60) {
+            if (shot1IsMoving && shotCooldown >= 30) {
                 shoot(2);
             }
         }
@@ -360,21 +398,6 @@ void main() {
 
             move_shots(); // if they are to be moved
 
-            // move opponent
-            if (step > 0)
-                opY++;
-            if (opY == 168) {
-                do {
-                    opY = 0;
-                    opX = arand();
-                } while (opX < 12 || opX > 128);
-                opX = 80;
-            }
-            move_sprite(4, opX, opY);
-            move_sprite(5, opX, opY+8);
-            move_sprite(6, opX+8, opY);
-            move_sprite(7, opX+8, opY+8);
-
             // move rock
             if (!rockIsMoving) {
                 if (rockStep == 4) {
@@ -382,7 +405,7 @@ void main() {
                     do {
                         rockY = 0;
                         rockX = arand();
-                    } while (rockX < 12 || rockX > 128);
+                    } while (rockX < 12 || rockX > 128|| rockX > opX - 32 && rockX < opX + 32);
                     rockIsMoving = true;
                 } else {
                     rockStep++;
@@ -397,6 +420,26 @@ void main() {
                     rockIsMoving = false;
                 }
             }
+
+            // move opponent
+            if (step > 0)
+                opY++;
+            if (opY >= 168) {
+                UINT8 r = arand();
+                if (r < 128) {
+                    do {
+                        opY = 0;
+                        opX = arand();
+                    } while (opX < 12 || opX > 128 || opX > rockX - 32 && opX < rockX + 32);
+                }
+            }
+            if (opY == 24 || opY == 84) {
+                op_shoot(3);
+            }
+            move_sprite(4, opX, opY);
+            move_sprite(5, opX, opY+8);
+            move_sprite(6, opX+8, opY);
+            move_sprite(7, opX+8, opY+8);
 
             detectCollission();
 
